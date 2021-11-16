@@ -6,6 +6,8 @@ import java.util.Queue;
 
 /** This class represents the puzzle and provides methods for generating
  *  its solutions.
+ *
+ *  @author Aramis Tanelus
  */
 public class Puzzle {
     
@@ -63,19 +65,6 @@ public class Puzzle {
             return resultBuilder.toString();
         }
 
-        public String toString() {
-            String result = "" + index;
-            if (left != null)
-                result += "\nleft: " + left.toString();
-            else 
-                result += "\nleft: null";
-
-            if (right != null)
-                result += "\nright: " + right.toString();
-            else
-                result += "\nright: null";
-            return result;
-        }
     }
 
     private int[] tiles;
