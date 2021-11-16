@@ -39,9 +39,10 @@ public class Puzzle {
             if (this.owner.tiles.length == 1)
                 return "[ 0 ]";
             
-            // Treats the first segment differently because it doesn't have a comma
+            // Treats the first segment differently because it doesn't have a comma or
+            // the space before the digit token
             StringBuilder resultBuilder = new StringBuilder("[");
-            String firstSegment = " %2d%c";
+            String firstSegment = "%2d%c";
             char directionChar = this.index == 0 ? direction : ' ';
             resultBuilder.append(String.format(
                         firstSegment,
