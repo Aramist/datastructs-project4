@@ -9,22 +9,25 @@ import java.util.Queue;
  */
 public class Puzzle {
     
-    /** Represents a node in a solution to the puzzle
+    /** Represents a node in a solution to the puzzle.
      * The nodes arrange themselves into a tree, with each node having
      * as many as 2 (for left and right) or as few as no solutions.
+     * Leaf nodes represent both solutions and dead ends (zeros that aren't
+     * the last element)
      */
     private class SolutionNode {
         private SolutionNode left;
         private SolutionNode right;
         private Puzzle owner;
         private int index;
-        private int[] hits;
+        private boolean isSolution;
         
         private SolutionNode(Puzzle p) {
             this.owner = p;
             this.left = null;
             this.right = null;
             this.index = 0;
+            this.isSolution = false;
         }
 
         /** Returns a string representation of this step of the solution
@@ -59,6 +62,20 @@ public class Puzzle {
             resultBuilder.append(",  0 ]");
             return resultBuilder.toString();
         }
+
+        public String toString() {
+            String result = "" + index;
+            if (left != null)
+                result += "\nleft: " + left.toString();
+            else 
+                result += "\nleft: null";
+
+            if (right != null)
+                result += "\nright: " + right.toString();
+            else
+                result += "\nright: null";
+            return result;
+        }
     }
 
     private int[] tiles;
@@ -78,7 +95,9 @@ public class Puzzle {
             throw new IllegalArgumentException("The last tile must have a value of 0.");
         for (int i = 0; i < tiles.length; i++) {
             if ( (tiles[i] < 0) || (tiles[i] > 99) )
-                throw new IllegalArgumentException("All tiles' values must be between 0 and 99 inclusive");
+                throw new IllegalArgumentException("ERROR: the puzzle values have to be positive integers.");
+            if (tiles[i] > 99)
+                throw new IllegalArgumentException("ERROR: the puzzle values have to be less than 100.");
         }
         this.tiles = tiles;
         this.root = new SolutionNode(this);
@@ -114,6 +133,7 @@ public class Puzzle {
         if (tileIndex == puzzleLen - 1) {
             start.left = null;
             start.right = null;
+            start.isSolution = true;
             return true;
         }
         
@@ -167,7 +187,7 @@ public class Puzzle {
         // line in the output solution for a particular traversal
         Queue<ArrayList<String> > paths = new LinkedList<>();
         traversalQueue.add(root);
-        paths.add(new ArrayList<String>());
+        paths.add(new ArrayList<>());
 
         // Holds the final solutions as multi-line strings
         ArrayList<String> solutions = new ArrayList<String>();
@@ -179,11 +199,18 @@ public class Puzzle {
             // Paths will always have the same size as traversalQueue
             ArrayList<String> currentPath = paths.poll();
 
-            if (currentNode.left == null && currentNode.right == null){
+            if (currentNode.isSolution){
+                // This if statement is only ever triggered for the input [ 0 ]
+                // For all other puzzles, including this line duplicates the last 
+                // step of the puzzle's solution
+                if (currentPath.size() == 0)
+                    currentPath.add(currentNode.toString(' '));
                 solutions.add(stringFromArrayList(currentPath));
                 continue;
             }
 
+            // If both are null and the continue wasn't executed, the node is a dead-end
+            // (a zero-value tile before the last element) and isn't a part of any solution
             if (currentNode.left != null) {
                 String leftAddition = currentNode.toString('L');
                 // The arraylist must be copied because the left traversal and
